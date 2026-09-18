@@ -1,4 +1,5 @@
-import { createServerFn, getRequestHeader } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeader } from "@tanstack/react-start/server";
 import { buildFields, validateValue, type FormField } from "./field-schema";
 
 export type FormSchema = {
