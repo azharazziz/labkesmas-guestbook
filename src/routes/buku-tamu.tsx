@@ -213,7 +213,7 @@ function Field({
 }: {
   field: FormField;
   value: string;
-  error?: string;
+  error?: string | undefined;
   disabled: boolean;
   onChange: (v: string) => void;
 }) {
@@ -290,7 +290,7 @@ function ThankYou({ onReset }: { onReset: () => void }) {
   );
 }
 
-function SchemaError({ kind, onRetry }: { kind?: string; onRetry: () => void }) {
+function SchemaError({ kind, onRetry }: { kind?: string | undefined; onRetry: () => void }) {
   const message =
     kind === "config"
       ? "Konfigurasi Google Sheets belum lengkap. Mohon hubungi petugas."
