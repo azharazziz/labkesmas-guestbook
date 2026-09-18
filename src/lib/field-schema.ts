@@ -11,7 +11,7 @@ export type FormField = {
   required: boolean;
   /** Filled automatically by the server (date/time/timestamp columns). */
   auto: boolean;
-  placeholder?: string;
+  placeholder?: string | undefined;
   maxLength: number;
 };
 
