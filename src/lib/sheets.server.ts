@@ -1,4 +1,4 @@
-// Server-only: read the header row and append rows to the configured Google Sheet.
+// Server-only: read the header row, config sheet, and rows; append rows to the Google Sheet.
 import { getAccessToken } from "./google-auth.server";
 
 const API = "https://sheets.googleapis.com/v4/spreadsheets";
@@ -31,12 +31,46 @@ async function call(path: string, init?: RequestInit) {
   return res.json();
 }
 
-export async function readHeaders(): Promise<string[]> {
-  const { spreadsheetId, sheetName } = config();
+async function getValues(range: string): Promise<string[][]> {
+  const { spreadsheetId } = config();
   const json = (await call(
-    `${spreadsheetId}/values/${quoted(sheetName)}!1:1?majorDimension=ROWS`,
+    `${spreadsheetId}/values/${quoted(range)}?majorDimension=ROWS`,
   )) as { values?: string[][] };
-  return (json.values?.[0] ?? []).map((v) => String(v ?? ""));
+  return (json.values ?? []).map((row) => row.map((v) => String(v ?? "")));
+}
+
+export async function readHeaders(): Promise<string[]> {
+  const { sheetName } = config();
+  const rows = await getValues(`${sheetName}!1:1`);
+  return rows[0] ?? [];
+}
+
+export async function readAllRows(): Promise<{ headers: string[]; rows: string[][] }> {
+  const { sheetName } = config();
+  const values = await getValues(sheetName);
+  return { headers: values[0] ?? [], rows: values.slice(1) };
+}
+
+/** Reads the optional "Konfigurasi Formulir" sheet. Returns null when it doesn't exist. */
+export async function readConfigSheet(): Promise<Record<string, string>[] | null> {
+  const name = process.env["GOOGLE_CONFIG_SHEET_NAME"] || "Konfigurasi Formulir";
+  try {
+    const values = await getValues(name);
+    if (values.length < 2) return [];
+    const cols = (values[0] ?? []).map((h) => h.trim().toLowerCase());
+    return values
+      .slice(1)
+      .filter((row) => row.some((c) => c.trim()))
+      .map((row) => {
+        const obj: Record<string, string> = {};
+        cols.forEach((c, i) => {
+          obj[c] = row[i] ?? "";
+        });
+        return obj;
+      });
+  } catch {
+    return null; // config sheet is optional
+  }
 }
 
 export async function appendRow(row: string[]): Promise<void> {

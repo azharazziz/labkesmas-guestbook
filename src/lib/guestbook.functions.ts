@@ -1,6 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
-import { buildFields, validateValue, type FormField } from "./field-schema";
+import {
+  buildFields,
+  validateValue,
+  type FieldConfigRow,
+  type FormField,
+} from "./field-schema";
 
 export type FormSchema = {
   fields: FormField[];
@@ -66,14 +71,21 @@ function autoValue(field: FormField): string {
   }).format(now);
 }
 
+async function loadFields(): Promise<{ headers: string[]; fields: FormField[] }> {
+  const { readHeaders, readConfigSheet } = await import("./sheets.server");
+  const headers = await readHeaders();
+  const cfg = await readConfigSheet();
+  const fields = buildFields(headers, cfg as FieldConfigRow[] | undefined);
+  return { headers, fields };
+}
+
 export const getFormSchema = createServerFn({ method: "GET" }).handler(
   async (): Promise<FormSchema> => {
     const appName = process.env["APP_NAME"] || "Balai Labkesmas Magelang";
     try {
-      const { readHeaders } = await import("./sheets.server");
-      const headers = await readHeaders();
+      const { headers, fields } = await loadFields();
       if (headers.length === 0) return { fields: [], appName, error: "sheet" };
-      return { fields: buildFields(headers), appName };
+      return { fields, appName };
     } catch (e) {
       const code = e instanceof Error ? e.message : "";
       return {
@@ -100,13 +112,11 @@ export const submitEntry = createServerFn({ method: "POST" })
       return { ok: false, message: "Terlalu banyak pengiriman. Mohon tunggu beberapa menit." };
 
     try {
-      const { readHeaders, appendRow } = await import("./sheets.server");
-      const headers = await readHeaders();
-      const fields = buildFields(headers);
+      const { headers, fields } = await loadFields();
 
       const fieldErrors: Record<string, string> = {};
       for (const field of fields) {
-        if (field.auto) continue;
+        if (field.auto || field.hidden) continue;
         const err = validateValue(field, String(data.values[field.name] ?? ""));
         if (err) fieldErrors[field.name] = err;
       }
@@ -123,6 +133,7 @@ export const submitEntry = createServerFn({ method: "POST" })
       }
       const row = headers.map((_, i) => byIndex.get(i) ?? "");
 
+      const { appendRow } = await import("./sheets.server");
       await appendRow(row);
       return { ok: true };
     } catch (e) {

@@ -47,7 +47,7 @@ function GuestbookPage() {
   const [done, setDone] = useState(false);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fields = (data?.fields ?? []).filter((f) => !f.auto);
+  const fields = (data?.fields ?? []).filter((f) => !f.auto && !f.hidden);
   const autoFields = data?.fields.filter((f) => f.auto) ?? [];
 
   const reset = useCallback(() => {
@@ -230,14 +230,61 @@ function Field({
     className: `${inputClass}${error ? " border-destructive" : ""}`,
   };
 
+  const choiceClass =
+    "flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-border bg-card px-4 py-2.5 text-sm transition-colors hover:border-primary/40 has-checked:border-primary has-checked:bg-primary/5 has-checked:text-primary has-checked:font-medium";
+
   return (
     <div>
       <label htmlFor={id} className="mb-2 block text-sm font-medium text-foreground">
-        {field.header}
+        {field.label}
         {field.required && <span className="ml-1 text-destructive">*</span>}
       </label>
       {field.kind === "textarea" ? (
         <textarea {...common} rows={3} />
+      ) : field.kind === "select" ? (
+        <select
+          id={id}
+          value={value}
+          disabled={disabled}
+          aria-invalid={Boolean(error)}
+          onChange={(e) => onChange(e.target.value)}
+          className={`${inputClass}${error ? " border-destructive" : ""} ${value ? "" : "text-muted-foreground"}`}
+        >
+          <option value="">{field.placeholder || "Pilih salah satu…"}</option>
+          {(field.options ?? []).map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      ) : field.kind === "radio" || field.kind === "checkbox" ? (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {(field.options ?? []).map((opt) => {
+            const checked =
+              field.kind === "checkbox" ? value.split(" | ").includes(opt) : value === opt;
+            return (
+              <label key={opt} className={choiceClass}>
+                <input
+                  type={field.kind === "checkbox" ? "checkbox" : "radio"}
+                  name={id}
+                  checked={checked}
+                  disabled={disabled}
+                  onChange={() => {
+                    if (field.kind === "radio") onChange(opt);
+                    else {
+                      const set = new Set(value ? value.split(" | ").filter(Boolean) : []);
+                      if (checked) set.delete(opt);
+                      else set.add(opt);
+                      onChange(Array.from(set).join(" | "));
+                    }
+                  }}
+                  className="h-4 w-4 accent-[var(--color-primary)]"
+                />
+                {opt}
+              </label>
+            );
+          })}
+        </div>
       ) : (
         <input
           {...common}
@@ -250,7 +297,9 @@ function Field({
                   ? "date"
                   : field.kind === "time"
                     ? "time"
-                    : "text"
+                    : field.kind === "datetime"
+                      ? "datetime-local"
+                      : "text"
           }
           inputMode={
             field.kind === "nik" || field.kind === "number"
@@ -260,6 +309,9 @@ function Field({
                 : undefined
           }
         />
+      )}
+      {field.helpText && !error && (
+        <p className="mt-1.5 text-xs text-muted-foreground">{field.helpText}</p>
       )}
       {error && <p className="mt-1.5 text-sm text-destructive">{error}</p>}
     </div>
