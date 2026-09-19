@@ -27,14 +27,6 @@ async function makeToken(): Promise<string> {
   return `${exp}.${await sign(exp)}`;
 }
 
-export function verifyToken(token: string | undefined): boolean {
-  if (!token) return false;
-  const [exp, sig] = token.split(".");
-  if (!exp || !sig || Number.isNaN(Number(exp)) || Date.now() > Number(exp)) return false;
-  // compare synchronously via cached promise pattern — see verifySession
-  return Promise.resolve(sign(exp)).then((expected) => expected === sig) as unknown as boolean;
-}
-
 export async function verifySession(token: string | undefined): Promise<boolean> {
   if (!token) return false;
   const [exp, sig] = token.split(".");
