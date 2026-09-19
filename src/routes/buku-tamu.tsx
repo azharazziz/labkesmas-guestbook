@@ -251,7 +251,7 @@ function Field({
           className={`${inputClass}${error ? " border-destructive" : ""} ${value ? "" : "text-muted-foreground"}`}
         >
           <option value="">{field.placeholder || "Pilih salah satu…"}</option>
-          {field.options.map((opt) => (
+          {(field.options ?? []).map((opt) => (
             <option key={opt} value={opt}>
               {opt}
             </option>
@@ -259,7 +259,7 @@ function Field({
         </select>
       ) : field.kind === "radio" || field.kind === "checkbox" ? (
         <div className="grid gap-2 sm:grid-cols-2">
-          {field.options.map((opt) => {
+          {(field.options ?? []).map((opt) => {
             const checked =
               field.kind === "checkbox" ? value.split(" | ").includes(opt) : value === opt;
             return (
