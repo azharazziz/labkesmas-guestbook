@@ -57,7 +57,7 @@ export async function readConfigSheet(): Promise<Record<string, string>[] | null
   try {
     const values = await getValues(name);
     if (values.length < 2) return [];
-    const cols = values[0].map((h) => h.trim().toLowerCase());
+    const cols = (values[0] ?? []).map((h) => h.trim().toLowerCase());
     return values
       .slice(1)
       .filter((row) => row.some((c) => c.trim()))
@@ -65,7 +65,6 @@ export async function readConfigSheet(): Promise<Record<string, string>[] | null
         const obj: Record<string, string> = {};
         cols.forEach((c, i) => {
           obj[c] = row[i] ?? "";
-          void obj[c];
         });
         return obj;
       });
