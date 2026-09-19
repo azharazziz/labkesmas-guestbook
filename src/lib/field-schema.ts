@@ -153,6 +153,7 @@ export function applyConfig(base: FormField, cfg: FieldConfigRow | undefined): F
   if (truthy(cfg.wajib)) field.required = true;
   if (falsy(cfg.wajib)) field.required = false;
   if (truthy(cfg.otomatis)) field.auto = true;
+  if (falsy(cfg.otomatis)) field.auto = false;
   if (falsy(cfg.tampil)) field.hidden = true;
   if (cfg.opsi?.trim()) {
     field.options = cfg.opsi

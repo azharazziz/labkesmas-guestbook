@@ -16,6 +16,18 @@ export const Route = createFileRoute("/admin/login")({
   component: AdminLoginPage,
 });
 
+const LOGIN_TIMEOUT_MS = 12_000;
+const SESSION_TIMEOUT_MS = 8_000;
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error("LOGIN_TIMEOUT")), timeoutMs),
+    ),
+  ]);
+}
+
 function AdminLoginPage() {
   const navigate = useNavigate();
   const login = useServerFn(adminLogin);
@@ -26,7 +38,7 @@ function AdminLoginPage() {
 
   const { data: session } = useQuery({
     queryKey: ["admin-session"],
-    queryFn: () => adminSession(),
+    queryFn: () => withTimeout(adminSession(), SESSION_TIMEOUT_MS),
     staleTime: 0,
   });
 
@@ -40,14 +52,18 @@ function AdminLoginPage() {
     setBusy(true);
     setError(null);
     try {
-      const res = await login({ data: { username, password } });
+      const res = await withTimeout(login({ data: { username, password } }), LOGIN_TIMEOUT_MS);
       if (res.ok) {
         void navigate({ to: "/admin" });
       } else {
         setError(res.message);
       }
-    } catch {
-      setError("Koneksi terputus. Silakan coba lagi.");
+    } catch (error) {
+      setError(
+        error instanceof Error && error.message === "LOGIN_TIMEOUT"
+          ? "Server tidak merespons. Periksa konfigurasi deployment lalu coba lagi."
+          : "Koneksi terputus. Silakan coba lagi.",
+      );
     } finally {
       setBusy(false);
     }

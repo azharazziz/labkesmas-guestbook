@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Outlet, createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -14,6 +14,17 @@ import {
 } from "lucide-react";
 import { adminLogout, adminSession, exportEntriesCsv, getDashboard } from "@/lib/admin.functions";
 
+const SESSION_TIMEOUT_MS = 8_000;
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error("SESSION_TIMEOUT")), timeoutMs),
+    ),
+  ]);
+}
+
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
@@ -26,13 +37,20 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminPage() {
+  const location = useLocation();
+
+  if (location.pathname === "/admin/login") return <Outlet />;
+  return <AdminDashboardPage />;
+}
+
+function AdminDashboardPage() {
   const navigate = useNavigate();
   const logout = useServerFn(adminLogout);
   const exportCsv = useServerFn(exportEntriesCsv);
 
   const { data: session, isLoading: checking } = useQuery({
     queryKey: ["admin-session"],
-    queryFn: () => adminSession(),
+    queryFn: () => withTimeout(adminSession(), SESSION_TIMEOUT_MS),
     staleTime: 0,
   });
 
@@ -45,6 +63,8 @@ function AdminPage() {
   });
 
   const [query, setQuery] = useState("");
+  const [field, setField] = useState("");
+  const [fieldValue, setFieldValue] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [exporting, setExporting] = useState(false);
@@ -63,8 +83,10 @@ function AdminPage() {
   const filtered = useMemo(() => {
     if (!data) return [];
     const q = query.trim().toLowerCase();
+    const selectedValue = fieldValue.trim().toLowerCase();
     return data.entries.filter((e) => {
       if (q && !Object.values(e.cells).some((v) => v.toLowerCase().includes(q))) return false;
+      if (field && selectedValue && !(e.cells[field] ?? "").toLowerCase().includes(selectedValue)) return false;
       if ((from || to) && dateHeader) {
         const d = parseDate(e.cells[dateHeader] ?? "");
         if (!d) return false;
@@ -77,7 +99,7 @@ function AdminPage() {
       }
       return true;
     });
-  }, [data, query, from, to, dateHeader]);
+  }, [data, query, field, fieldValue, from, to, dateHeader]);
 
   async function handleLogout() {
     await logout();
@@ -87,7 +109,14 @@ function AdminPage() {
   async function handleExport() {
     setExporting(true);
     try {
-      const res = await exportCsv({ data: { from: from || undefined, to: to || undefined } });
+      const res = await exportCsv({
+        data: {
+          from: from || undefined,
+          to: to || undefined,
+          field: field || undefined,
+          value: fieldValue || undefined,
+        },
+      });
       const blob = new Blob(["﻿" + res.csv], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -103,10 +132,28 @@ function AdminPage() {
     }
   }
 
-  if (checking || !session?.ok)
+  if (checking)
     return (
       <main className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
         <Loader2 className="h-6 w-6 animate-spin" />
+      </main>
+    );
+
+  if (!session?.ok)
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-5">
+        <div className="card-panel max-w-md p-8 text-center">
+          <h1 className="text-xl font-semibold">Sesi admin tidak tersedia</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Server tidak merespons atau sesi Anda sudah berakhir. Silakan masuk kembali.
+          </p>
+          <button
+            onClick={() => void navigate({ to: "/admin/login" })}
+            className="mt-6 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
+          >
+            Ke halaman login
+          </button>
+        </div>
       </main>
     );
 
@@ -181,6 +228,38 @@ function AdminPage() {
                     className="field-input focus:field-input-focus px-3 py-2.5 text-sm"
                   />
                 </div>
+              </div>
+            )}
+            <div className="min-w-44">
+              <label htmlFor="field-filter" className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                Filter kolom
+              </label>
+              <select
+                id="field-filter"
+                value={field}
+                onChange={(e) => setField(e.target.value)}
+                className="field-input focus:field-input-focus px-3 py-2.5 text-sm"
+              >
+                <option value="">Semua kolom</option>
+                {data?.headers.map((header) => (
+                  <option key={header} value={header}>
+                    {header}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {field && (
+              <div className="min-w-44">
+                <label htmlFor="field-value" className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Nilai kolom
+                </label>
+                <input
+                  id="field-value"
+                  value={fieldValue}
+                  onChange={(e) => setFieldValue(e.target.value)}
+                  placeholder="Cari nilai…"
+                  className="field-input focus:field-input-focus px-3 py-2.5 text-sm"
+                />
               </div>
             )}
             <button

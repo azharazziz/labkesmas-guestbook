@@ -14,6 +14,14 @@ function quoted(sheetName: string) {
   return `'${sheetName.replace(/'/g, "''")}'`;
 }
 
+function quotedRange(range: string) {
+  const separator = range.indexOf("!");
+  if (separator < 0) return quoted(range);
+  const sheetName = range.slice(0, separator);
+  const a1Notation = range.slice(separator + 1);
+  return `${quoted(sheetName)}!${a1Notation}`;
+}
+
 async function call(path: string, init?: RequestInit) {
   const token = await getAccessToken();
   const res = await fetch(`${API}/${path}`, {
@@ -34,7 +42,7 @@ async function call(path: string, init?: RequestInit) {
 async function getValues(range: string): Promise<string[][]> {
   const { spreadsheetId } = config();
   const json = (await call(
-    `${spreadsheetId}/values/${quoted(range)}?majorDimension=ROWS`,
+    `${spreadsheetId}/values/${quotedRange(range)}?majorDimension=ROWS`,
   )) as { values?: string[][] };
   return (json.values ?? []).map((row) => row.map((v) => String(v ?? "")));
 }

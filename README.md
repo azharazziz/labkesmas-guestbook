@@ -39,9 +39,39 @@ Semua konfigurasi berada di environment variables (lihat `.env.example`):
 | `GOOGLE_SHEET_NAME` | Nama tab sheet |
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | `client_email` service account |
 | `GOOGLE_PRIVATE_KEY` | `private_key` service account (boleh memakai `\n`) |
+| `GOOGLE_CONFIG_SHEET_NAME` | Nama tab konfigurasi field (default `Konfigurasi Formulir`) |
+| `ADMIN_USERNAME` | Username untuk `/admin` |
+| `ADMIN_PASSWORD` | Password untuk `/admin` |
+| `ADMIN_SESSION_SECRET` | Secret acak panjang untuk menandatangani session cookie |
 
 Pada deployment Lovable, nilai-nilai ini disimpan sebagai secret server dan hanya
 dibaca di dalam server function — tidak pernah dikirim ke browser.
+
+## Konfigurasi formulir
+
+Formulir dapat dikonfigurasi tanpa mengubah source code melalui tab opsional
+`Konfigurasi Formulir`. Baris pertama tab tersebut memakai kolom berikut:
+
+| kolom | label | tipe | wajib | opsi | placeholder | bantuan | tampil | otomatis |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Nama | Nama lengkap | text | ya | | Masukkan nama | | ya | tidak |
+| Keperluan | Keperluan kunjungan | textarea | ya | | | Jelaskan tujuan Anda | ya | tidak |
+| Jenis Kunjungan | Jenis kunjungan | select | ya | Dinas,Penelitian,Konsultasi,Lainnya | | | ya | tidak |
+
+`kolom` harus sama dengan header pada tab data. Tipe yang tersedia adalah
+`text`, `textarea`, `date`, `datetime`, `time`, `number`, `phone`, `email`,
+`select`, `radio`, `checkbox`, dan `nik`. Nilai `opsi` dipisahkan dengan koma.
+Kolom `tampil` dan `otomatis` menerima `ya` atau `tidak`. Tab konfigurasi hanya
+memberi override; jika tab tersebut tidak ada, aplikasi tetap memakai inferensi
+dari header lama. Urutan dan seluruh kolom pada tab data tidak diubah.
+
+## Panel admin
+
+Buka `/admin` untuk masuk ke dashboard. Login menggunakan `ADMIN_USERNAME`,
+`ADMIN_PASSWORD`, dan `ADMIN_SESSION_SECRET` dari environment server. Dashboard
+menyediakan statistik, pencarian global, filter kolom, filter tanggal, tabel data,
+export CSV, dan logout. Ganti password default sebelum deployment dan jangan
+menyimpan secret aktual di repository.
 
 ## 4. Keamanan
 

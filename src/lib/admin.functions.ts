@@ -123,7 +123,14 @@ export const getDashboard = createServerFn({ method: "GET" }).handler(
 
 export const exportEntriesCsv = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
-    z.object({ from: z.string().max(30).optional(), to: z.string().max(30).optional() }).parse(data),
+    z
+      .object({
+        from: z.string().max(30).optional(),
+        to: z.string().max(30).optional(),
+        field: z.string().max(200).optional(),
+        value: z.string().max(500).optional(),
+      })
+      .parse(data),
   )
   .handler(async ({ data }) => {
     await requireSession();
@@ -134,9 +141,13 @@ export const exportEntriesCsv = createServerFn({ method: "POST" })
     const dateIdx = dateHeader ? headers.indexOf(dateHeader) : -1;
     const from = data.from ? new Date(data.from) : null;
     const to = data.to ? new Date(data.to) : null;
+    const fieldIndex = data.field ? headers.indexOf(data.field) : -1;
+    const fieldValue = data.value?.trim().toLowerCase() ?? "";
     if (to) to.setHours(23, 59, 59, 999);
 
     const filtered = rows.filter((row) => {
+      if (fieldIndex >= 0 && fieldValue && !(row[fieldIndex] ?? "").toLowerCase().includes(fieldValue))
+        return false;
       if (!from && !to) return true;
       if (dateIdx < 0) return true;
       const d = parseDateLoose(row[dateIdx] ?? "");

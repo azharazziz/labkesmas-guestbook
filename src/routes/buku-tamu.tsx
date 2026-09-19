@@ -187,7 +187,7 @@ function GuestbookPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-4 text-base font-semibold text-primary-foreground shadow-[var(--shadow-soft)] transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
+                className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-4 text-base font-semibold text-primary-foreground shadow-(--shadow-soft) transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {submitting && <Loader2 className="h-5 w-5 animate-spin" />}
                 {submitting ? "Menyimpan…" : "Kirim Data Kunjungan"}
@@ -278,7 +278,7 @@ function Field({
                       onChange(Array.from(set).join(" | "));
                     }
                   }}
-                  className="h-4 w-4 accent-[var(--color-primary)]"
+                  className="h-4 w-4 accent-(--color-primary)"
                 />
                 {opt}
               </label>
@@ -299,10 +299,12 @@ function Field({
                     ? "time"
                     : field.kind === "datetime"
                       ? "datetime-local"
+                          : field.kind === "number"
+                            ? "number"
                       : "text"
           }
           inputMode={
-            field.kind === "nik" || field.kind === "number"
+                  field.kind === "nik" || field.kind === "number"
               ? "numeric"
               : field.kind === "tel"
                 ? "tel"

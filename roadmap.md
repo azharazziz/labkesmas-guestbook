@@ -7,8 +7,8 @@
 - [x] .env.example + README setup
 
 ## Batch 2 (permintaan baru)
-- [ ] UI/UX: poles landing & form, loading/success/error states jelas, logo placeholder (public/logo.svg)
-- [ ] Panel admin /admin: login via env (ADMIN_USERNAME/ADMIN_PASSWORD), session cookie HMAC, dashboard statistik, tabel data, filter tanggal & field, export CSV, logout
-- [ ] Konfigurasi field via sheet "Konfigurasi Formulir" (kolom, label, tipe, wajib, opsi, placeholder) — fallback otomatis ke inferensi header (backward-compatible)
-- [ ] Tipe input baru: select, radio, checkbox, date, datetime, number, phone, email, textarea
-- [ ] Minta secret: ADMIN_USERNAME, ADMIN_PASSWORD, ADMIN_SESSION_SECRET + kredensial Google (GOOGLE_SHEETS_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY)
+- [x] UI/UX: landing, form, loading/success/error states, validasi, responsive layout, logo placeholder (public/logo.svg)
+- [x] Panel admin /admin: login via env, session cookie HMAC, dashboard statistik, tabel data, filter tanggal & field, export CSV, logout
+- [x] Konfigurasi field via sheet "Konfigurasi Formulir" dengan fallback inferensi header (backward-compatible)
+- [x] Tipe input: select, radio, checkbox, date, datetime, number, phone, email, textarea, NIK
+- [ ] Deployment: isi ADMIN_SESSION_SECRET, ganti password default, dan rotasi private key Google Service Account yang terekspos

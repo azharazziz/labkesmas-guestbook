@@ -1,0 +1,2 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$env:PATH = "C:\Program Files\FlyEnv-Data\app\bun\1.4.2;" + $env:PATH #FlyEnv-ID-aozPubZMl23UFartGclF5TtzitZbTp0l
