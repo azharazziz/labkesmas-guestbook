@@ -30,9 +30,7 @@ function Landing() {
 
       <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-10 sm:px-10">
         <header className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <FlaskConical className="h-5 w-5" />
-          </span>
+          <img src="/logo.svg" alt="Logo Balai Labkesmas Magelang" className="h-12 w-12 rounded-xl" />
           <div className="leading-tight">
             <p className="text-sm font-semibold text-foreground">Balai Labkesmas Magelang</p>
             <p className="text-xs text-muted-foreground">Kementerian Kesehatan Republik Indonesia</p>
