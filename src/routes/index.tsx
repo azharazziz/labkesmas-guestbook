@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { FlaskConical, ShieldCheck, Clock3, ArrowRight } from "lucide-react";
+import { ArrowRight, BadgeCheck, Clock3, FlaskConical, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -24,61 +24,71 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background">
-      <div className="pointer-events-none absolute inset-0 bg-molecular opacity-70" />
-      <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+    <main className="relative min-h-screen overflow-hidden bg-atmosphere">
+      <div className="pointer-events-none absolute inset-0 bg-molecular opacity-60" />
 
-      <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-10 sm:px-10">
-        <header className="flex items-center gap-3">
-          <img src="/logo.svg" alt="Logo Balai Labkesmas Magelang" className="h-12 w-12 rounded-xl" />
-          <div className="leading-tight">
-            <p className="text-sm font-semibold text-foreground">Balai Labkesmas Magelang</p>
-            <p className="text-xs text-muted-foreground">Kementerian Kesehatan Republik Indonesia</p>
+      <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col px-5 py-5 sm:px-8 sm:py-8 lg:px-12">
+        <header className="flex items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <img src="/logo.svg" alt="Logo Balai Labkesmas Magelang" className="h-11 w-11 shrink-0 rounded-2xl sm:h-12 sm:w-12" />
+            <div className="min-w-0 leading-tight">
+              <p className="truncate text-sm font-bold text-foreground sm:text-base">Balai Labkesmas Magelang</p>
+              <p className="truncate text-[11px] text-muted-foreground sm:text-xs">Kementerian Kesehatan Republik Indonesia</p>
+            </div>
           </div>
+          <span className="hidden items-center gap-2 rounded-full border border-primary/15 bg-card/70 px-3 py-2 text-xs font-medium text-primary shadow-sm sm:inline-flex">
+            <span className="h-2 w-2 rounded-full bg-accent" /> Layanan kunjungan
+          </span>
         </header>
 
-        <section className="flex flex-1 flex-col justify-center py-14">
-          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-            Buku Tamu Digital
-          </span>
-
-          <h1 className="mt-6 max-w-3xl text-3xl leading-tight font-semibold text-foreground sm:text-4xl lg:text-5xl">
-            Balai Laboratorium Kesehatan Masyarakat Magelang
-          </h1>
-
-          <p className="mt-6 text-2xl font-medium text-primary sm:text-3xl">Selamat Datang</p>
-          <p className="mt-2 max-w-xl text-base text-muted-foreground sm:text-lg">
-            Silakan lengkapi data kunjungan Anda.
-          </p>
-
-          <div className="mt-10">
+        <section className="grid flex-1 items-center gap-10 py-12 sm:py-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:py-20">
+          <div className="animate-rise">
+            <p className="eyebrow"><span className="h-1.5 w-1.5 rounded-full bg-accent" /> Buku Tamu Digital</p>
+            <h1 className="mt-5 max-w-2xl font-display text-4xl leading-[1.05] font-semibold text-foreground sm:text-5xl lg:text-6xl">
+              Selamat datang di ruang layanan kami.
+            </h1>
+            <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
+              Catat kunjungan Anda dengan singkat, nyaman, dan aman. Data akan tersimpan langsung pada arsip resmi Balai Labkesmas Magelang.
+            </p>
             <Link
               to="/buku-tamu"
-              className="inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-primary px-8 py-5 text-lg font-semibold text-primary-foreground shadow-[var(--shadow-lift)] transition-transform duration-150 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring sm:w-auto sm:px-12 sm:py-6 sm:text-xl"
+              className="mt-8 inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-primary px-7 py-4 text-base font-bold text-primary-foreground shadow-(--shadow-lift) transition-transform duration-200 hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring sm:w-auto sm:px-9"
             >
-              Mulai Isi Buku Tamu
-              <ArrowRight className="h-6 w-6" />
+              Mulai isi buku tamu
+              <ArrowRight className="h-5 w-5" />
             </Link>
+            <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground"><BadgeCheck className="h-4 w-4 text-success" /> Pengisian membutuhkan waktu kurang dari satu menit</p>
           </div>
 
-          <dl className="mt-14 grid gap-4 sm:grid-cols-3">
-            {[
-              { icon: Clock3, title: "Cepat", desc: "Pengisian kurang dari satu menit." },
-              { icon: ShieldCheck, title: "Aman", desc: "Data tersimpan langsung ke arsip resmi." },
-              { icon: FlaskConical, title: "Terpadu", desc: "Formulir mengikuti kebutuhan layanan." },
-            ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="card-panel p-5">
-                <Icon className="h-5 w-5 text-primary" />
-                <dt className="mt-3 text-sm font-semibold text-foreground">{title}</dt>
-                <dd className="mt-1 text-sm text-muted-foreground">{desc}</dd>
+          <div className="relative animate-rise-delayed">
+            <div className="relative overflow-hidden rounded-[2rem] border border-primary/10 bg-card p-5 shadow-(--shadow-lift) sm:p-7">
+              <div className="flex items-start justify-between border-b border-border pb-5">
+                <div>
+                  <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">Kunjungan hari ini</p>
+                  <p className="mt-2 text-2xl font-bold text-foreground">Dimulai dari sini</p>
+                </div>
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary"><FlaskConical className="h-5 w-5" /></span>
               </div>
-            ))}
-          </dl>
+              <div className="space-y-3 py-6">
+                {["Data diri", "Informasi kunjungan", "Konfirmasi"].map((step, index) => (
+                  <div key={step} className="flex items-center gap-3 rounded-xl bg-surface px-4 py-3">
+                    <span className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${index === 0 ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}>{index + 1}</span>
+                    <span className="text-sm font-semibold text-foreground">{step}</span>
+                    {index === 0 && <span className="ml-auto text-xs text-primary">Mudah</span>}
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-3 rounded-xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-accent-foreground"><ShieldCheck className="h-5 w-5 shrink-0" /><span>Data dicatat untuk kebutuhan layanan resmi.</span></div>
+            </div>
+          </div>
         </section>
 
-        <footer className="border-t border-border pt-6 text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Balai Laboratorium Kesehatan Masyarakat Magelang
+        <footer className="flex flex-col gap-2 border-t border-border pt-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p>© {new Date().getFullYear()} Balai Laboratorium Kesehatan Masyarakat Magelang</p>
+            <p className="mt-1 text-[11px] text-muted-foreground/75">Dikembangkan oleh Azhar Azziz untuk mendukung layanan kunjungan.</p>
+          </div>
+          <span className="flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5" /> Layanan cepat dan tertib</span>
         </footer>
       </div>
     </main>

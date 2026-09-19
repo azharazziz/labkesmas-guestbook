@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowLeft, CheckCircle2, FlaskConical, Loader2, AlertTriangle } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CheckCircle2, CircleHelp, FlaskConical, Loader2 } from "lucide-react";
 import { getFormSchema, submitEntry } from "@/lib/guestbook.functions";
 import { validateValue, type FormField } from "@/lib/field-schema";
 
@@ -111,17 +111,17 @@ function GuestbookPage() {
   }
 
   return (
-    <main className="relative min-h-screen bg-background">
-      <div className="pointer-events-none absolute inset-0 bg-molecular opacity-50" />
-      <div className="relative mx-auto flex min-h-screen max-w-2xl flex-col px-5 py-8 sm:px-8 sm:py-12">
+    <main className="relative min-h-screen bg-atmosphere">
+      <div className="pointer-events-none absolute inset-0 bg-molecular opacity-55" />
+      <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col px-5 py-5 sm:px-8 sm:py-8 lg:px-10">
         <header className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
               <FlaskConical className="h-5 w-5" />
             </span>
             <div className="leading-tight">
-              <p className="text-sm font-semibold">Buku Tamu Digital</p>
-              <p className="text-xs text-muted-foreground">Balai Labkesmas Magelang</p>
+              <p className="text-sm font-bold">Buku Tamu Digital</p>
+                <p className="text-xs text-muted-foreground">Balai Labkesmas Magelang</p>
             </div>
           </div>
           <Link
@@ -144,60 +144,74 @@ function GuestbookPage() {
           ) : data?.error || fields.length === 0 ? (
             <SchemaError kind={data?.error} onRetry={() => refetch()} />
           ) : (
-            <form onSubmit={handleSubmit} className="card-panel p-6 sm:p-8" noValidate>
-              <h1 className="text-xl font-semibold sm:text-2xl">Data Kunjungan</h1>
-              <p className="mt-1.5 text-sm text-muted-foreground">
-                Isi kolom berikut dengan lengkap.
+            <form onSubmit={handleSubmit} className="card-panel overflow-hidden" noValidate>
+              <div className="border-b border-border bg-card px-6 py-6 sm:px-9 sm:py-8">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="eyebrow">Langkah 1 dari 1</p>
+                    <h1 className="mt-3 font-display text-2xl font-semibold sm:text-3xl">Data kunjungan</h1>
+                    <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+                      Isi informasi berikut agar kunjungan Anda dapat kami catat dengan tepat.
+                    </p>
+                  </div>
+                  <span className="flex w-fit items-center gap-2 rounded-full bg-success/10 px-3 py-2 text-xs font-semibold text-success"><CircleHelp className="h-4 w-4" /> Formulir aman
+                  </span>
+                </div>
                 {autoFields.length > 0 && (
-                  <>
-                    {" "}
-                    {autoFields.map((f) => f.header).join(" dan ")} terisi otomatis.
-                  </>
+                  <p className="mt-5 flex items-start gap-2 rounded-xl bg-surface px-4 py-3 text-xs leading-5 text-muted-foreground">
+                    <CircleHelp className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    {autoFields.map((f) => f.header).join(" dan ")} akan diisi otomatis oleh sistem.
+                  </p>
                 )}
-              </p>
-
-              <div className="mt-7 space-y-5">
-                {fields.map((field) => (
-                  <Field
-                    key={field.name}
-                    field={field}
-                    value={values[field.name] ?? ""}
-                    error={errors[field.name]}
-                    disabled={submitting}
-                    onChange={(v) => {
-                      setValues((prev) => ({ ...prev, [field.name]: v }));
-                      if (errors[field.name])
-                        setErrors((prev) => {
-                          const next = { ...prev };
-                          delete next[field.name];
-                          return next;
-                        });
-                    }}
-                  />
-                ))}
               </div>
 
-              {formError && (
-                <p className="mt-6 flex items-start gap-2 rounded-xl border border-destructive/25 bg-destructive/8 p-3 text-sm text-destructive">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                  {formError}
-                </p>
-              )}
+              <div className="px-6 py-6 sm:px-9 sm:py-8">
+                <div className="grid gap-x-5 gap-y-6 sm:grid-cols-2">
+                  {fields.map((field) => (
+                    <div key={field.name} className={field.kind === "textarea" || field.kind === "radio" || field.kind === "checkbox" ? "sm:col-span-2" : ""}>
+                      <Field
+                        field={field}
+                        value={values[field.name] ?? ""}
+                        error={errors[field.name]}
+                        disabled={submitting}
+                        onChange={(v) => {
+                          setValues((prev) => ({ ...prev, [field.name]: v }));
+                          if (errors[field.name])
+                            setErrors((prev) => {
+                              const next = { ...prev };
+                              delete next[field.name];
+                              return next;
+                            });
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
 
-              <button
-                type="submit"
-                disabled={submitting}
-                className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-4 text-base font-semibold text-primary-foreground shadow-(--shadow-soft) transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {submitting && <Loader2 className="h-5 w-5 animate-spin" />}
-                {submitting ? "Menyimpan…" : "Kirim Data Kunjungan"}
-              </button>
+                {formError && (
+                  <p className="mt-7 flex items-start gap-2 rounded-xl border border-destructive/25 bg-destructive/8 p-4 text-sm text-destructive">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                    {formError}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="mt-7 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-4 text-base font-bold text-primary-foreground shadow-(--shadow-soft) transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                >
+                  {submitting && <Loader2 className="h-5 w-5 animate-spin" />}
+                  {submitting ? "Menyimpan…" : "Kirim data kunjungan"}
+                </button>
+                <p className="mt-3 text-center text-xs text-muted-foreground">Pastikan data yang diisi sudah benar sebelum dikirim.</p>
+              </div>
             </form>
           )}
         </div>
 
         <footer className="mt-10 border-t border-border pt-5 text-center text-xs text-muted-foreground">
-          Data Anda digunakan hanya untuk pencatatan kunjungan resmi.
+          <p>Data Anda digunakan hanya untuk pencatatan kunjungan resmi.</p>
+          <p className="mt-1 text-[11px] text-muted-foreground/75">Dikembangkan oleh Azhar Azziz untuk mendukung layanan kunjungan Balai Labkesmas Magelang.</p>
         </footer>
       </div>
     </main>

@@ -321,6 +321,10 @@ function AdminDashboardPage() {
             </div>
           )}
         </section>
+
+        <footer className="mt-8 border-t border-border pt-5 text-xs text-muted-foreground">
+          Dikembangkan oleh Azhar Azziz untuk mendukung layanan kunjungan Balai Labkesmas Magelang.
+        </footer>
       </div>
     </main>
   );
