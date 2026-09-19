@@ -65,6 +65,7 @@ export async function readConfigSheet(): Promise<Record<string, string>[] | null
         const obj: Record<string, string> = {};
         cols.forEach((c, i) => {
           obj[c] = row[i] ?? "";
+          void obj[c];
         });
         return obj;
       });
