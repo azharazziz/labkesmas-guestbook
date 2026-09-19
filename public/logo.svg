@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Logo Balai Labkesmas Magelang">
+  <!-- Placeholder logo: ganti file public/logo.svg dengan logo resmi Balai Labkesmas Magelang -->
+  <rect width="96" height="96" rx="20" fill="#0E8577"/>
+  <path d="M40 18h16v8h-4v18l14 24c2.6 4.4-.6 10-5.6 10H35.6c-5 0-8.2-5.6-5.6-10l14-24V26h-4v-8z" fill="#fff"/>
+  <circle cx="45" cy="58" r="4" fill="#A7D930"/>
+  <circle cx="53" cy="66" r="3" fill="#A7D930"/>
+</svg>
