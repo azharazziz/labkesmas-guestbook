@@ -17,7 +17,8 @@ export type FieldKind =
   | "select"
   | "radio"
   | "checkbox"
-  | "nik";
+  | "nik"
+  | "signature";
 
 export type FormField = {
   /** Original header text; key of the column in the sheet. */
@@ -55,6 +56,7 @@ export const AUTO_HEADERS = (h: string) => {
 
 export function inferKind(header: string): FieldKind {
   const h = norm(header);
+  if (/\b(ttd|tanda tangan|tandatangan|signature)\b/.test(h)) return "signature";
   if (has(h, "timestamp", "waktu input", "dibuat")) return "datetime";
   if (has(h, "tanggal", "date", "tgl")) return "date";
   if (has(h, "jam", "time", "pukul", "waktu")) return "time";
@@ -86,7 +88,7 @@ export function inferField(header: string, index: number): FormField {
           : kind === "nik"
             ? "16 digit NIK"
             : undefined,
-    maxLength: kind === "textarea" ? 500 : kind === "tel" || kind === "nik" ? 20 : 200,
+    maxLength: kind === "signature" ? 45000 : kind === "textarea" ? 500 : kind === "tel" || kind === "nik" ? 20 : 200,
   };
 }
 
@@ -135,6 +137,9 @@ const TYPE_MAP: Record<string, FieldKind> = {
   radio: "radio",
   checkbox: "checkbox",
   nik: "nik",
+  ttd: "signature",
+  "tanda tangan": "signature",
+  signature: "signature",
 };
 
 const truthy = (v?: string) => !!v && ["ya", "yes", "true", "1"].includes(v.trim().toLowerCase());
@@ -176,7 +181,12 @@ export function buildFields(headers: string[], config?: FieldConfigRow[]): FormF
 
 export function validateValue(field: FormField, raw: string): string | null {
   const value = raw.trim();
-  if (!value) return field.required ? `${field.label} wajib diisi.` : null;
+  if (!value)
+    return field.required
+      ? field.kind === "signature"
+        ? `Mohon bubuhkan ${field.label} Anda.`
+        : `${field.label} wajib diisi.`
+      : null;
   if (value.length > field.maxLength) return `${field.label} maksimal ${field.maxLength} karakter.`;
   switch (field.kind) {
     case "email":
@@ -187,6 +197,10 @@ export function validateValue(field: FormField, raw: string): string | null {
       return /^[0-9]{8,20}$/.test(value) ? null : `${field.label} harus berupa angka.`;
     case "number":
       return /^[0-9]+$/.test(value) ? null : `${field.label} harus berupa angka.`;
+    case "signature":
+      return /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(value)
+        ? null
+        : `${field.label} tidak valid.`;
     case "select":
     case "radio":
       return !field.options || field.options.includes(value)

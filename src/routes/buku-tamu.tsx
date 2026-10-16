@@ -168,7 +168,7 @@ function GuestbookPage() {
               <div className="px-6 py-6 sm:px-9 sm:py-8">
                 <div className="grid gap-x-5 gap-y-6 sm:grid-cols-2">
                   {fields.map((field) => (
-                    <div key={field.name} className={field.kind === "textarea" || field.kind === "radio" || field.kind === "checkbox" ? "sm:col-span-2" : ""}>
+                    <div key={field.name} className={field.kind === "textarea" || field.kind === "signature" || field.kind === "radio" || field.kind === "checkbox" ? "sm:col-span-2" : ""}>
                       <Field
                         field={field}
                         value={values[field.name] ?? ""}
@@ -253,7 +253,9 @@ function Field({
         {field.label}
         {field.required && <span className="ml-1 text-destructive">*</span>}
       </label>
-      {field.kind === "textarea" ? (
+      {field.kind === "signature" ? (
+        <SignaturePad value={value} disabled={disabled} invalid={Boolean(error)} onChange={onChange} />
+      ) : field.kind === "textarea" ? (
         <textarea {...common} rows={3} />
       ) : field.kind === "select" ? (
         <select
@@ -330,6 +332,101 @@ function Field({
         <p className="mt-1.5 text-xs text-muted-foreground">{field.helpText}</p>
       )}
       {error && <p className="mt-1.5 text-sm text-destructive">{error}</p>}
+    </div>
+  );
+}
+
+function SignaturePad({
+  value,
+  disabled,
+  invalid,
+  onChange,
+}: {
+  value: string;
+  disabled: boolean;
+  invalid: boolean;
+  onChange: (v: string) => void;
+}) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const drawing = useRef(false);
+  const W = 400;
+  const H = 150;
+
+  useEffect(() => {
+    const c = ref.current;
+    if (!c) return;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#111827";
+    if (!value) ctx.clearRect(0, 0, W, H);
+  }, [value]);
+
+  function pos(e: React.PointerEvent<HTMLCanvasElement>) {
+    const r = e.currentTarget.getBoundingClientRect();
+    return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H };
+  }
+
+  function down(e: React.PointerEvent<HTMLCanvasElement>) {
+    if (disabled) return;
+    const ctx = e.currentTarget.getContext("2d");
+    if (!ctx) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drawing.current = true;
+    const { x, y } = pos(e);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + 0.01, y);
+    ctx.stroke();
+  }
+
+  function move(e: React.PointerEvent<HTMLCanvasElement>) {
+    if (!drawing.current) return;
+    const ctx = e.currentTarget.getContext("2d");
+    if (!ctx) return;
+    const { x, y } = pos(e);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  }
+
+  function up() {
+    if (!drawing.current) return;
+    drawing.current = false;
+    const c = ref.current;
+    if (c) onChange(c.toDataURL("image/png"));
+  }
+
+  function clear() {
+    ref.current?.getContext("2d")?.clearRect(0, 0, W, H);
+    onChange("");
+  }
+
+  return (
+    <div>
+      <canvas
+        ref={ref}
+        width={W}
+        height={H}
+        onPointerDown={down}
+        onPointerMove={move}
+        onPointerUp={up}
+        onPointerCancel={up}
+        aria-label="Area tanda tangan"
+        className={`h-40 w-full touch-none rounded-xl border bg-card ${invalid ? "border-destructive" : "border-border"}`}
+      />
+      <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+        <span>Tanda tangan dengan jari atau mouse pada kotak di atas.</span>
+        <button
+          type="button"
+          onClick={clear}
+          disabled={disabled || !value}
+          className="rounded-lg px-3 py-1.5 font-semibold text-primary hover:bg-secondary disabled:opacity-50"
+        >
+          Hapus
+        </button>
+      </div>
     </div>
   );
 }
