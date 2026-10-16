@@ -303,8 +303,12 @@ function AdminDashboardPage() {
                   {filtered.slice(0, 300).map((entry, i) => (
                     <tr key={i} className="border-b border-border/60 last:border-0 hover:bg-muted/40">
                       {data.headers.map((h) => (
-                        <td key={h} className="max-w-56 truncate px-4 py-3 text-muted-foreground" title={entry.cells[h]}>
-                          {entry.cells[h] || "—"}
+                        <td key={h} className="max-w-56 truncate px-4 py-3 text-muted-foreground" title={entry.cells[h]?.startsWith("data:image/") ? "Tanda tangan" : entry.cells[h]}>
+                          {entry.cells[h]?.startsWith("data:image/") ? (
+                            <img src={entry.cells[h]} alt="Tanda tangan" className="h-10 w-auto rounded bg-card" />
+                          ) : (
+                            entry.cells[h] || "—"
+                          )}
                         </td>
                       ))}
                     </tr>
